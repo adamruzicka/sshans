@@ -38,18 +38,24 @@ def var(key, sources, default=None):
 
 host = inventory.hosts[hostname]
 sources = [host.vars] + [group.vars for group in host.groups]
-
-# TODO?: Get ansible_ssh_private_key_file
-user = var("ansible_user", sources)
 host = var("ansible_host", sources, hostname)
+
+def ssh_option(command, option, value):
+    if value:
+        command.append("-o")
+        command.append(f"{option}={value}")
+
+command = ["ssh"]
+if host != hostname:
+    ssh_option(command, "Hostname", host)
+ssh_option(command, "User", var("ansible_user", sources))
+ssh_option(command, "IdentityFile", var("ansible_ssh_private_key_file", sources))
+ssh_option(command, "Port", var("ansible_port", sources))
+command.append(hostname)
+
 password = var("ansible_password", sources)
-
-host_string = host
-if user:
-    host_string = f"{user}@{host_string}"
-
 if password:
     os.environ["SSHPASS"] = password
-    os.execl("/usr/bin/sshpass", "sshpass", "-e", "ssh", host_string)
+    os.execl("/usr/bin/sshpass", "sshpass", "-e", *command)
 else:
-    os.execl("/usr/bin/ssh", "ssh", host_string)
+    os.execl("/usr/bin/ssh", *command)
