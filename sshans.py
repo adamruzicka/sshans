@@ -50,5 +50,6 @@ if user:
 
 if password:
     os.environ["SSHPASS"] = password
-
-os.execl("/usr/bin/sshpass", "sshpass", "-e", "ssh", host_string)
+    os.execl("/usr/bin/sshpass", "sshpass", "-e", "ssh", host_string)
+else:
+    os.execl("/usr/bin/ssh", "ssh", host_string)
