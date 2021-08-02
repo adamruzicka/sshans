@@ -28,11 +28,6 @@ hostname = fzf.communicate(bytes("\n".join(hostnames), "UTF-8"))[0].decode().str
 if hostname == "":
     sys.exit(1)
 
-host = inventory.hosts[hostname]
-host_vars = host.vars
-all_vars = inventory.groups["all"].vars
-
-
 def var(key, sources, default=None):
     result = None
     for source in sources:
@@ -41,9 +36,8 @@ def var(key, sources, default=None):
             break
     return result or default
 
-
-# TODO: Check all host's groups, not just 'all'
-sources = [host_vars, all_vars]
+host = inventory.hosts[hostname]
+sources = [host.vars] + [group.vars for group in host.groups]
 
 # TODO?: Get ansible_ssh_private_key_file
 user = var("ansible_user", sources)
