@@ -39,7 +39,7 @@ def var(key, sources, default=None):
         result = source.get(key, None)
         if result:
             break
-    return result or Default
+    return result or default
 
 
 # TODO: Check all host's groups, not just 'all'
